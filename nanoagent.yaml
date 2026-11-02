@@ -1,0 +1,41 @@
+_ > nanoagent.plugin.v0001.ManifestConfig:
+id: simhash-state-dedup
+name: SimHash Page-State Deduplicator
+version: 0.1.0
+status: ready
+spec: nanoagent.plugin/v0001
+
+runtime > nanoagent.plugin.v0001.RuntimeConfig:
+  type: mcp_stdio
+  command: [uv, run, --frozen, python, -m, plugin]
+
+permissions > nanoagent.plugin.v0001.PermissionsConfig:
+  network > nanoagent.plugin.v0001.NetworkConfig:
+    hosts: []
+  filesystem > nanoagent.plugin.v0001.FilesystemConfig:
+    write: [workspace]
+
+# One entry per contract.Tool; its input and output classes are contract.TOOLS's.
+tools > dict[contract.Tool, nanoagent.plugin.v0001.ToolConfig]:
+  list_snapshots:
+    description: List the page snapshots of a seed and the Hamming-distance threshold for the same page state
+  view_snapshot:
+    description: Show one snapshot's accessibility-tree lines, ads, clocks and session ids included
+  fingerprint:
+    description: Give one snapshot's 64-bit SimHash fingerprint
+  distances:
+    description: Give the Hamming distance from each of up to 25 snapshots' fingerprints to every other snapshot's
+  group_snapshots:
+    description: Every snapshot, its fingerprint and the true grouping; the reference, never shown to the agent
+
+# One entry per contract.Task; its input and output classes are contract.TASKS's.
+tasks > dict[contract.Task, nanoagent.plugin.v0001.TaskConfig]:
+  group-page-states:
+    description: Group page snapshots that differ only in ads, clocks and session ids into page states
+    runner: agent
+    tools: [list_snapshots, view_snapshot, fingerprint, distances]
+    reference: group_snapshots
+    instructions: |-
+      Call list_snapshots with the seed to get every snapshot id and the threshold.
+      Call distances once with the seed and every snapshot id (there are at most 24) to get each snapshot's Hamming distance to every other snapshot. Two snapshots are linked when their distance is at most the threshold; a page state is a group of snapshots joined by links, directly or through other snapshots. view_snapshot and fingerprint are there if you want to look closer.
+      Submit groups: one list of snapshot ids per page state, every snapshot in exactly one group, a snapshot linked to no other in a group of its own.

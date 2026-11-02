@@ -1,0 +1,12 @@
+_ > nanoagent.plugin.v0001.ProductConfig:
+tagline: "Tell which page snapshots are really the same page, despite ads, clocks and sessions"
+summary: "A web agent that remembers what it tried needs to know when two pages are the same state. Built from a seed, each set of snapshots captures a few page states several times, each capture with its own ads, clock and session id. The agent compares SimHash fingerprints and groups the snapshots into page states. The verifier recomputes every fingerprint and the grouping itself."
+highlights:
+  - "Every set of snapshots is rebuilt exactly from its seed, so any run can be reproduced"
+  - "The verifier recomputes every SimHash itself: no model judges the grouping"
+  - "Shows which groups join different states and which states were split"
+steps:
+  - "Give a seed"
+  - "The agent compares every snapshot's fingerprint with the others"
+  - "It groups the snapshots into page states"
+  - "The verifier recomputes the groups and shows the verdict"
